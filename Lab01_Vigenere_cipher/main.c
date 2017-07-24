@@ -47,7 +47,7 @@ int letterOnly(char *string, int length)
 
     if (j)
     {
-        string[++j] = 0;
+        string[j] = 0;
         return 0;
     }
     else
@@ -56,21 +56,77 @@ int letterOnly(char *string, int length)
     }
 }
 
+int messagePreprocess(char *message, int length)
+{
+    int i = 0, j = 0;
+    for (i = 0; i < length; i++)
+    {
+        //printf("%c", message[i]);
+        if (message[i] >= 'A' && message[i] <= 'Z')
+        {
+            message[j] = message[i];
+            j++;
+        }
+        else if (message[i] >= 'a' && message[i] <= 'z')
+        {
+            message[j] = message[i] - 32;
+            j++;
+        }
+        else if (message[i] == 32)
+        {
+            message[j] = 32;
+            j++;
+        }
+    }
+    message[j] = 0;
+    return 0;
+}
+
+int messageEncrypt(char *message, int messageLength, char *key, int keyLength)
+{
+    // i stands for the position of the char, iM stands for the index of the letter in the message
+    int i = 0, iM = 0, iK = 0, charM, charK;
+    for (i = 0; i < messageLength; i++)
+    {
+        // shift 65~90 to 0~25 65*2=130
+        if (message[i] != 32)
+        {
+            iK = iM % keyLength;
+            message[i] = (message[i] + key[iK] - 130) % 26 + 65;
+            iM ++;
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc == 2)
     {
-        int length = strlen(argv[1]);
-        char password[length];
-        if (!letterOnly(argv[1], length))
+        // process the password
+        // strlen https://stackoverflow.com/questions/22084848/c-programming-functionality-of-strlen
+        char *key = argv[1];
+        int length = strlen(key);
+        if (!letterOnly(key, length))
         {
-            printf("The argument supplied is %s\n", argv[1]);
+            printf("The argument supplied is %s\n", key);
         }
         else
         {
             printf("Please input password with letters in it!\n");
             return 0;
         }
+        // get the text to encode
+        char *message;
+        message = inputString(stdin, 10);
+        // encrypt
+        int messageLength = strlen(message);
+        messagePreprocess(message, messageLength);
+        messageLength = strlen(message);
+        messageEncrypt(message, messageLength, key, length);
+        fputs(message, stdout);
+        fputs("\n", stdout);
+        //printf("%s\n", message);
     }
     else if (argc > 2)
     {
