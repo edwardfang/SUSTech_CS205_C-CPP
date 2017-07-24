@@ -82,7 +82,7 @@ int messagePreprocess(char *message, int length)
     return 0;
 }
 
-int messageEncrypt(char *message, int messageLength, char *key, int keyLength)
+int messageDecrypt(char *message, int messageLength, char *key, int keyLength)
 {
     // i stands for the position of the char, iM stands for the index of the letter in the message
     int i = 0, iM = 0, iK = 0, charM, charK;
@@ -92,7 +92,9 @@ int messageEncrypt(char *message, int messageLength, char *key, int keyLength)
         if (message[i] != 32)
         {
             iK = iM % keyLength;
-            message[i] = (message[i] + key[iK] - 130) % 26 + 65;
+            // plus 26 to make the modulus result positive
+            message[i] = (message[i] + 26 - key[iK]) % 26 + 65;
+            //printf("%d", message[i]);
             iM ++;
         }
     }
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
         int messageLength = strlen(message);
         messagePreprocess(message, messageLength);
         messageLength = strlen(message);
-        messageEncrypt(message, messageLength, key, length);
+        messageDecrypt(message, messageLength, key, length);
         fputs(message, stdout);
         fputs("\n", stdout);
         //printf("%s\n", message);
