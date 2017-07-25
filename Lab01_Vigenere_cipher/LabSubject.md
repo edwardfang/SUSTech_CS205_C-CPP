@@ -46,8 +46,11 @@ b) Use the array above to encrypt messages read from the standard input.
  - The encoded text is written to the standard output.
 
 Examples (the program is called here "vigenere" but you can give it any name you want)
-vigenere hello < to_encode.txt > encoded.txt
-vigenere "hello world" < to encode.txt > encoded.txt
+
+`vigenere hello < to_encode.txt > encoded.txt`
+
+`vigenere "hello world" < to encode.txt > encoded.txt`
+
 Any character that isn't a to z or A to Z is ignored. Spaces are ignored in the password, and everything is transformed to uppercase ("hello world" = HELLOWORLD).
 Spaces in the text to encode are kept and output without any change. Letters are converted to uppercase. Other characters than basic letters and spaces (even digits) are discarded.
 The program mustn't crash if no password is provided!
