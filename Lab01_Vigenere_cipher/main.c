@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
         fputs(message, stdout);
         fputs("\n", stdout);
         //printf("%s\n", message);
+        free(message);
     }
     else if (argc > 2)
     {

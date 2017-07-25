@@ -56,45 +56,45 @@ int letterOnly(char *string, int length)
     }
 }
 
-int messagePreprocess(char *message, int length)
+int cipherPreprocess(char *cipher, int length)
 {
     int i = 0, j = 0;
     for (i = 0; i < length; i++)
     {
-        //printf("%c", message[i]);
-        if (message[i] >= 'A' && message[i] <= 'Z')
+        //printf("%c", cipher[i]);
+        if (cipher[i] >= 'A' && cipher[i] <= 'Z')
         {
-            message[j] = message[i];
+            cipher[j] = cipher[i];
             j++;
         }
-        else if (message[i] >= 'a' && message[i] <= 'z')
+        else if (cipher[i] >= 'a' && cipher[i] <= 'z')
         {
-            message[j] = message[i] - 32;
+            cipher[j] = cipher[i] - 32;
             j++;
         }
-        else if (message[i] == 32)
+        else if (cipher[i] == 32)
         {
-            message[j] = 32;
+            cipher[j] = 32;
             j++;
         }
     }
-    message[j] = 0;
+    cipher[j] = 0;
     return 0;
 }
 
-int messageDecrypt(char *message, int messageLength, char *key, int keyLength)
+int cipherDecrypt(char *cipher, int cipherLength, char *key, int keyLength)
 {
-    // i stands for the position of the char, iM stands for the index of the letter in the message
+    // i stands for the position of the char, iM stands for the index of the letter in the cipher
     int i = 0, iM = 0, iK = 0, charM, charK;
-    for (i = 0; i < messageLength; i++)
+    for (i = 0; i < cipherLength; i++)
     {
         // shift 65~90 to 0~25 65*2=130
-        if (message[i] != 32)
+        if (cipher[i] != 32)
         {
             iK = iM % keyLength;
             // plus 26 to make the modulus result positive
-            message[i] = (message[i] + 26 - key[iK]) % 26 + 65;
-            //printf("%d", message[i]);
+            cipher[i] = (cipher[i] + 26 - key[iK]) % 26 + 65;
+            //printf("%d", cipher[i]);
             iM ++;
         }
     }
@@ -115,16 +115,17 @@ int main(int argc, char *argv[])
             return 0;
         }
         // get the text to encode
-        char *message;
-        message = inputString(stdin, 10);
+        char *cipher;
+        cipher = inputString(stdin, 10);
         // encrypt
-        int messageLength = strlen(message);
-        messagePreprocess(message, messageLength);
-        messageLength = strlen(message);
-        messageDecrypt(message, messageLength, key, length);
-        fputs(message, stdout);
+        int cipherLength = strlen(cipher);
+        cipherPreprocess(cipher, cipherLength);
+        cipherLength = strlen(cipher);
+        cipherDecrypt(cipher, cipherLength, key, length);
+        fputs(cipher, stdout);
         fputs("\n", stdout);
-        //printf("%s\n", message);
+        //printf("%s\n", cipher);
+        free(cipher);
     }
     else if (argc > 2)
     {
