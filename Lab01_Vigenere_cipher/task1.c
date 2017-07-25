@@ -8,10 +8,12 @@ int main()
     int id, i = 0;
     printf("Please enter your name:");
     c = getchar();
-    while(c!='\n'){
+    while (c != '\n')
+    {
         name[i++] = c;
         c = getchar();
-        if(i==98){
+        if (i == 98)
+        {
             break;
         }
     };
@@ -20,18 +22,21 @@ int main()
     //fgets(name, 100, stdin);
     //newline = strchr(name,'\n');
     //newline = 0;
-    
+
     //problem shooting https://stackoverflow.com/questions/13049893/working-of-scanf-and-checking-if-input-is-int
-    while(1){
-        printf("Please enter your student id: ");
-        if(scanf("%d", &id)>0){
-            break;
-        }
-        getchar();
+    int reads;
+    char a;
+    printf("Please enter your student id: ");
+    while (((reads = scanf("%d%c", &id, &a)) != 2 && reads != EOF) || a != '\n')
+    {
+        printf("Please enter an integer only : ");
+        // read at least one character until the next newline
+        do
+        {
+            reads = scanf("%c", &a);
+        } while (reads != EOF && a != '\n');
     }
-    
-    
-    printf("Welcome %s - %d to the C and C++ world\n", name, id);
+
+    printf("Welcome %s - %d to the C and C++ world! \n", name, id);
     return 0;
 }
-
