@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 // from https://stackoverflow.com/questions/16870485/how-can-i-read-an-input-string-of-unknown-length
 char *inputString(FILE *fp, size_t size)
@@ -72,9 +73,9 @@ int cipherPreprocess(char *cipher, int length)
             cipher[j] = cipher[i] - 32;
             j++;
         }
-        else if (cipher[i] == 32)
+        else if (isspace(cipher[i]))
         {
-            cipher[j] = 32;
+            cipher[j] = cipher[i];
             j++;
         }
     }
@@ -89,7 +90,7 @@ int cipherDecrypt(char *cipher, int cipherLength, char *key, int keyLength)
     for (i = 0; i < cipherLength; i++)
     {
         // shift 65~90 to 0~25 65*2=130
-        if (cipher[i] != 32)
+        if (!isspace(cipher[i]))
         {
             iK = iM % keyLength;
             // plus 26 to make the modulus result positive
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
         cipherLength = strlen(cipher);
         cipherDecrypt(cipher, cipherLength, key, length);
         fputs(cipher, stdout);
-        fputs("\n", stdout);
+        //fputs("\n", stdout);
         //printf("%s\n", cipher);
         free(cipher);
     }

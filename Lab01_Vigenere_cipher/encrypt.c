@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 // from https://stackoverflow.com/questions/16870485/how-can-i-read-an-input-string-of-unknown-length
 char *inputString(FILE *fp, size_t size)
@@ -72,9 +73,9 @@ int messagePreprocess(char *message, int length)
             message[j] = message[i] - 32;
             j++;
         }
-        else if (message[i] == 32)
+        else if (isspace(message[i]))
         {
-            message[j] = 32;
+            message[j] = message[i];
             j++;
         }
     }
@@ -89,11 +90,11 @@ int messageEncrypt(char *message, int messageLength, char *key, int keyLength)
     for (i = 0; i < messageLength; i++)
     {
         // shift 65~90 to 0~25 65*2=130
-        if (message[i] != 32)
+        if (!(isspace(message[i])))
         {
             iK = iM % keyLength;
             message[i] = (message[i] + key[iK] - 130) % 26 + 65;
-            iM ++;
+            iM++;
         }
     }
     return 0;
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
         int length = strlen(key);
         if (letterOnly(key, length))
         {
-            printf("Please input password with letters in it!\n");
+            fprintf(stderr, "Please input password with letters in it!\n");
             return 0;
         }
         // get the text to encode
@@ -121,17 +122,17 @@ int main(int argc, char *argv[])
         messageLength = strlen(message);
         messageEncrypt(message, messageLength, key, length);
         fputs(message, stdout);
-        fputs("\n", stdout);
+        //fputs("\n", stdout);
         //printf("%s\n", message);
         free(message);
     }
     else if (argc > 2)
     {
-        printf("Too many arguments input.\n");
+        fprintf(stderr, "Too many arguments input.\n");
     }
     else
     {
-        printf("One argument for password expected.\n");
+        fprintf(stderr, "One argument for password expected.\n");
     }
     return 0;
 }
