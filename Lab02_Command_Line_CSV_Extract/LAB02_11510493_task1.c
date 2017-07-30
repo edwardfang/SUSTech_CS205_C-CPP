@@ -140,6 +140,11 @@ int check_rows(int *rows, int size)
 
 int main(int argc, char *argv[])
 {
+	char *usage = "Usage: %s [-s separator] [-i igln] row0 row1 ... \n"
+	"where\n"
+	"\tseparator is the character to separate different columns.\n"
+	"\tigln is the number of lines to ignore from the beginning.\n"
+	"\trow0 row1 ... is column numbers to extract.\n";
 	int opt, lastoptind = 1;
 	char sep = ' '; // default separator: one space
 	int igln = 0;   // the number of lines to ignore (default: 0)
@@ -158,8 +163,7 @@ int main(int argc, char *argv[])
 			lastoptind = optind;
 			break;
 		default: /* '?' */
-			fprintf(stderr, "Usage: %s [-s separator] [-i the number of lines to ignore] row numbers to extract \n",
-					argv[0]);
+			fprintf(stderr, usage,	argv[0]);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -168,6 +172,7 @@ int main(int argc, char *argv[])
 	if (optind < lastoptind)
 	{
 		fprintf(stderr, "Expected argument after options, no argument before options!\n");
+		fprintf(stderr, usage,	argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
