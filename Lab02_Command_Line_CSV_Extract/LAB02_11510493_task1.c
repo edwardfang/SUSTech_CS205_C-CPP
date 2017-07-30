@@ -10,41 +10,12 @@
 
 extern int errno;
 
-// from https://stackoverflow.com/questions/16870485/how-can-i-read-an-input-string-of-unknown-length
-char *inputString(FILE *fp, size_t size)
-{
-	//The size is extended by the input with the value of the provisional
-	char *str;
-	int ch;
-	size_t len = 0;
-	str = realloc(NULL, sizeof(char) * size); //size is start size
-	if (!str)
-		return str;
-	//while (EOF != (ch = fgetc(fp)) && ch != '\n')
-	while (EOF != (ch = fgetc(fp))) // only encontering EOF will the reading stop;
-	{
-		str[len++] = ch;
-		if (len == size)
-		{
-			str = realloc(str, sizeof(char) * (size += 16));
-			if (!str)
-			{
-				perror("Error during reallocation");
-				return NULL;
-			}
-		}
-	}
-	str[len++] = '\0';
-
-	return realloc(str, sizeof(char) * len);
-}
-
-
 int update_colin(int *rows, int rowssize, int rowcur)
 {
 	int i;
 	for (i = 0; i < rowssize; i++)
 	{
+		//printf("%d-%d\n", rows[i], rowcur);
 		if (rowcur == rows[i])
 		{
 			return 1;
@@ -52,7 +23,6 @@ int update_colin(int *rows, int rowssize, int rowcur)
 	}
 	return 0;
 }
-
 
 int extract(int *rows, int rowssize, char sep, int igln)
 {
@@ -68,6 +38,7 @@ int extract(int *rows, int rowssize, char sep, int igln)
 	{
 		//str[len++] = ch;
 		// main algorithm
+		//printf("%d\n", colin);
 		switch (ch)
 		{
 		case '"': // doublequotes processing
@@ -75,7 +46,7 @@ int extract(int *rows, int rowssize, char sep, int igln)
 			// add this char
 			if (colin && line > igln)
 			{
-				output[outlen] = sep;
+				output[outlen] = '"';
 				outlen++;
 			}
 			break;
@@ -93,16 +64,19 @@ int extract(int *rows, int rowssize, char sep, int igln)
 		default:
 			if (ch == sep)
 			{
-				if (doublequotes != 0)
+				if (doublequotes == 0)
 				{
 					colnum += 1;
 					colinbefore = colin;
 					colin = update_colin(rows, rowssize, colnum);
 					if (colinbefore && line > igln)
 					{
-						output[outlen] = sep;
-						outlen++;
+						output[outlen++] = sep;
 					}
+				}
+				else
+				{
+					output[outlen++] = sep;
 				}
 			}
 			else if (line > igln) // skip line
@@ -110,8 +84,7 @@ int extract(int *rows, int rowssize, char sep, int igln)
 				// find column
 				if (colin)
 				{
-					output[outlen] = sep;
-					outlen++;
+					output[outlen++] = ch;
 				}
 			}
 		}
@@ -138,7 +111,9 @@ int extract(int *rows, int rowssize, char sep, int igln)
 	output[outlen++] = '\0';
 
 	printf("%s\n%lu", output, strlen(output));
+	return 0;
 }
+
 int main(int argc, char *argv[])
 {
 	int opt;
@@ -163,7 +138,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("sep=%c igln=%d\n", sep, igln);
-	
+
 	if (optind >= argc)
 	{
 		fprintf(stderr, "Expected argument after options\n");
@@ -172,8 +147,26 @@ int main(int argc, char *argv[])
 
 	printf("name argument = %s, %s\n", argv[optind], argv[optind + 1]);
 
-	int *rows = NULL, size = 0;
+	// get num for columns
+	int iarg = optind, size = 0;
+	for (; iarg < argc; iarg++)
+	{
+		if (strtod(argv[iarg], NULL) != 0)
+		{
+			size++;
+		}
+	}
+
+	int *rows = (int *)malloc(size * sizeof(int));
 	// get rows
+	int i = 0;
+	for (iarg = optind; iarg < argc; iarg++)
+	{
+		if (strtod(argv[iarg], NULL) != 0)
+		{
+			rows[i++] = (int)strtod(argv[iarg], NULL);
+		}
+	}
 	extract(rows, size, sep, igln);
 
 	exit(EXIT_SUCCESS);
