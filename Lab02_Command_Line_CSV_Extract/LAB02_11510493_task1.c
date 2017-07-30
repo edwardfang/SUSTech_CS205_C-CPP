@@ -4,9 +4,7 @@
 #include <string.h>
 #include <errno.h>
 
-//#define MAXLENGTH_PER_LINE 1000
 #define OUTPUT_INCREASE 1000
-//#define INCREASE 16
 
 extern int errno;
 
@@ -17,6 +15,7 @@ int is_colin(int *rows, int rowssize, int rowcur)
 	{
 		if (rowcur == rows[i])
 		{
+			// printf("in\n");
 			return 1;
 		}
 	}
@@ -25,39 +24,48 @@ int is_colin(int *rows, int rowssize, int rowcur)
 
 int extract(int *rows, int rowssize, char sep, int igln)
 {
-	char *output = realloc(NULL, sizeof(char) * OUTPUT_INCREASE);
+	char *output = (char *)malloc(sizeof(char) * OUTPUT_INCREASE);
 	char ch;
 	size_t outlen = 0, outsize = OUTPUT_INCREASE;
-	int colnum = 1, line = 1, colinbefore = 0, colin = 0, doublequotes = 0;
+	int colnum = 1, line = 1, colinbefore = 0, colin = 0, doublequotes = 0, hasinfo = 0;
 	colin = is_colin(rows, rowssize, colnum);
 	while (EOF != (ch = fgetc(stdin)))
 	{
+		//printf("DEBUG1");
 		// main algorithm
 		switch (ch)
 		{
 		case '"': // doublequotes processing
+			// printf("DEBUG2");
 			doublequotes = (doublequotes + 1) % 2;
 			// add this char
 			if (colin && line > igln)
 			{
-				output[outlen] = '"';
-				outlen++;
+				output[outlen++] = '"';
 			}
 			break;
 		case '\n':
+			// printf("DEBUG3\n");
 			// add '\n' at the previous position to replace the sep
-			if (line > igln)
+			if (line > igln && hasinfo == 1)
 			{
 				output[outlen - 1] = '\n';
 			}
 			line++;
+			hasinfo = 0;
 			colnum = 1;
 			colin = is_colin(rows, rowssize, colnum);
 			colinbefore = 0;
 			break;
 		default:
+			if (colin)
+			{
+				hasinfo = 1;
+			}
+			// printf("DEBUG4");
 			if (ch == sep)
 			{
+				// printf("DEBUG5");
 				if (doublequotes == 0)
 				{
 					colnum += 1;
@@ -65,11 +73,13 @@ int extract(int *rows, int rowssize, char sep, int igln)
 					colin = is_colin(rows, rowssize, colnum);
 					if (colinbefore && line > igln)
 					{
+
 						output[outlen++] = sep;
 					}
 				}
 				else
 				{
+					// printf("DEBUG6");
 					if (colin)
 					{
 						output[outlen++] = sep;
@@ -79,6 +89,7 @@ int extract(int *rows, int rowssize, char sep, int igln)
 			else if (line > igln) // skip line
 			{
 				// find column
+				// printf("DEBUG7");
 				if (colin)
 				{
 					output[outlen++] = ch;
@@ -86,8 +97,10 @@ int extract(int *rows, int rowssize, char sep, int igln)
 			}
 		}
 		// extend size of output
+		//printf("%u, %u, %u\n", outlen, outsize, strlen(output));
 		if (outlen == outsize)
 		{
+			//printf("%s", output);
 			output = realloc(output, sizeof(char) * (outsize += OUTPUT_INCREASE));
 			if (!output)
 			{
@@ -96,22 +109,31 @@ int extract(int *rows, int rowssize, char sep, int igln)
 			}
 		}
 	}
-	output[outlen++] = '\0';
+	output[outlen] = '\0';
 
 	printf("%s", output);
+	if (outlen > 0)
+	{
+		fflush(stdout);
+		fflush(stdin);
+		free(output);
+	}
 	return 0;
 }
 
-int check_rows(int* rows, int size){
-	int i,j;
-	for(i=0;i<size;i++){
+int check_rows(int *rows, int size)
+{
+	int i, j;
+	for (i = 0; i < size; i++)
+	{
 		// check repeatation and increasing
-		for(j=0;j<i;j++){
-			if(rows[i]<=rows[j]){
+		for (j = 0; j < i; j++)
+		{
+			if (rows[i] <= rows[j])
+			{
 				return -1;
 			}
 		}
-		
 	}
 	return 0;
 }
@@ -142,16 +164,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// printf("sep=%c igln=%d\n", sep, igln);
-
 	// check the order of options
 	if (optind < lastoptind)
 	{
 		fprintf(stderr, "Expected argument after options, no argument before options!\n");
 		exit(EXIT_FAILURE);
 	}
-
-	//printf("name argument = %s, %s\n", argv[optind], argv[optind + 1]);
 
 	// get num for columns
 	int iarg = optind, size = 0;
@@ -172,8 +190,9 @@ int main(int argc, char *argv[])
 	int i = 0;
 	for (iarg = optind; iarg < argc; iarg++)
 	{
-		if (strtol(argv[iarg], NULL, 10) != 0)
+		if (strtol(argv[iarg], NULL, 10) > 0)
 		{
+			//printf("%d|%d\n",i, (int)strtol(argv[iarg], NULL, 10));
 			rows[i++] = (int)strtol(argv[iarg], NULL, 10);
 		}
 		else
@@ -183,12 +202,17 @@ int main(int argc, char *argv[])
 	}
 
 	// check the validation of the rows
-	if(check_rows(rows, size)){
+	if (check_rows(rows, size))
+	{
 		fprintf(stderr, "1. Field numbers should always be provided in increasing sequence\n\
 2. You cannot repeat a field\n");
 		exit(EXIT_FAILURE);
 	}
 	extract(rows, size, sep, igln);
-
+	// printf("sep=%c igln=%d\n", sep, igln);
+	// printf("name argument = %s, %s\n", argv[optind], argv[optind + 1]);
+	fflush(stdin);
+	fflush(stdout);
+	free(rows);
 	exit(EXIT_SUCCESS);
 }
