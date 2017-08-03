@@ -142,11 +142,11 @@ int main(int argc, char *argv[])
 {
 	char *usage = "Usage: %s [-s separator] [-i igln] row0 row1 ... \n"
 	"where\n"
-	"\tseparator is the character to separate different columns.\n"
-	"\tigln is the number of lines to ignore from the beginning.\n"
+	"\tseparator is the character to separate different columns. Default: comma\n"
+	"\tigln is the number of lines to ignore from the beginning. Default: 0\n"
 	"\trow0 row1 ... is column numbers to extract.\n";
 	int opt, lastoptind = 1;
-	char sep = ' '; // default separator: one space
+	char sep = ','; // default separator: comma
 	int igln = 0;   // the number of lines to ignore (default: 0)
 
 	// read options
@@ -209,8 +209,8 @@ int main(int argc, char *argv[])
 	// check the validation of the rows
 	if (check_rows(rows, size))
 	{
-		fprintf(stderr, "1. Field numbers should always be provided in increasing sequence\n\
-2. You cannot repeat a field\n");
+		fprintf(stderr, "1. Field numbers should always be provided in increasing sequence\n"
+			"2. You cannot repeat a field\n");
 		exit(EXIT_FAILURE);
 	}
 	extract(rows, size, sep, igln);
