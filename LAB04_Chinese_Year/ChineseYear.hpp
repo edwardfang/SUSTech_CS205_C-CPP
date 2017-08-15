@@ -10,6 +10,8 @@ class ChineseYear {
                 // This is the year when the Chinese New Year took place
 
     public:
+        ChineseYear &operator+=(int num);
+        ChineseYear &operator+(int num);
         // Here are two exceptions that you can use
         class WrongChineseYear:std::exception {
             public:
@@ -42,7 +44,7 @@ class ChineseYear {
         // tested by scripts and it has to be exactly as expected.
         friend std::ostream &operator<<(std::ostream &os,
                                         const ChineseYear &cy);
-
+        friend ChineseYear &operator+(int num, ChineseYear &cy);
         // You are asked to implement operator+=(), to add a number of years
         // to a ChineseYear, as well as operator+() to implement addition between
         // a ChineseYear and a number of years (the difference? in the first case 
@@ -52,5 +54,6 @@ class ChineseYear {
         // It’s up to you to decide whether to use methods or friend functions.
 
 };
+
 
 #endif
